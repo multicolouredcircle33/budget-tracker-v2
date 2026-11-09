@@ -1,2 +1,4 @@
-_pycache__/
+budget_tracker.csv
+__pycache__/
 .pytest_cache/
+practice/
