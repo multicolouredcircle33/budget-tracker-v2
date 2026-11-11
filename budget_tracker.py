@@ -184,6 +184,12 @@ def biggest_expense():
     )
     print('  ')
 
+def month_total(records, month):
+    return sum(
+        amount
+        for expense_date, category, amount in records
+        if expense_date.startswith(month)
+    )
 
 def monthly_summary():
     months = [

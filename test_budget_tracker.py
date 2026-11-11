@@ -60,3 +60,22 @@ def test_empty_text_is_rejected():
 def test_only_spaces_is_rejected():
     with pytest.raises(ValueError):
         budget_tracker.clean_category("   ")
+
+MONTH_RECORDS = [
+    ("2026-03-05", "Rent", 150000.0),
+    ("2026-03-20", "Food", 50000.0),
+    ("2026-10-21", "Food", 20000.0),
+    ("2025-03-15", "Rent", 1000.0),
+]
+
+
+def test_month_total_counts_only_that_month():
+    assert budget_tracker.month_total(MONTH_RECORDS, "2026-03") == 200000.0
+
+
+def test_month_total_is_zero_when_month_has_no_expenses():
+    assert budget_tracker.month_total(MONTH_RECORDS, "2026-11") == 0
+
+
+def test_month_total_does_not_mix_up_years():
+    assert budget_tracker.month_total(MONTH_RECORDS, "2025-03") == 1000.0
