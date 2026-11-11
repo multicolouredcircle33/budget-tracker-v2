@@ -223,17 +223,11 @@ def monthly_summary():
 
     year = month_input[:4]
 
-    matching_expenses = [
-        amount
-        for expense_date, category, amount in expenses
-        if expense_date.startswith(month_input)
-    ]
+    total = month_total(expenses, month_input)
 
-    if not matching_expenses:
+    if total == 0:
         print('No expenses have been recorded in this month.')
     else:
-        total = sum(matching_expenses)
-
         print(
             f'You have spent a total of ₦{total:,.2f} '
             f'in {months[month_number - 1]} {year}.'
