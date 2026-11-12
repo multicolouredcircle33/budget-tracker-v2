@@ -1,5 +1,7 @@
 # Budget Tracker v2
 
+[![tests](https://github.com/multicolouredcircle33/budget-tracker-v2/actions/workflows/tests.yml/badge.svg)](https://github.com/multicolouredcircle33/budget-tracker-v2/actions/workflows/tests.yml)
+
 A personal budget tracker that runs in the terminal. Expenses are saved to a CSV file, so your data is still there the next time you open it.
 
 ## What it does
