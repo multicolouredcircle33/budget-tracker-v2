@@ -90,3 +90,26 @@ If you edit the file by hand, use a text editor, not a spreadsheet program. Spre
 1. Editing or deleting an expense
 2. Summaries over a date range
 3. Tests for the amount check
+
+## How AI was used
+
+I built this project while studying how useful AI is in software engineering, so this section records exactly what AI did, what I did, and how each part was checked.
+
+| Part | Who did it | How it was checked |
+|---|---|---|
+| Version 1 of the tracker | Me | An AI code review. I checked each point it raised, and 3 of 3 were correct |
+| Specification for v2 | Me, in three drafts. Claude then asked me 53 questions to find gaps and wrote the final spec from my answers | I read the final spec against my answers |
+| v2 code | ChatGPT, built in three steps from my spec | I ran worked examples after each step |
+| `category_totals` and `month_total` | ChatGPT, from a short description. It never saw my tests | My tests, written first. 8 of 8 passed on the first try |
+| Tests | Me | I watched each test fail before the code existed, then pass after |
+| README, sample data and the GitHub test workflow | Drafted by Claude from the actual code | I ran the commands and checked the results |
+
+### What went wrong
+
+1. **A gap in the spec.** It never said what to do when the CSV file does not end with a new line. ChatGPT followed the spec exactly, so a new expense got glued onto the last row. I found it by testing with a file saved from a spreadsheet, and fixed it.
+2. **An unrequested change.** When I asked ChatGPT to reprint the whole file, it quietly rewrote a function I had not asked it to touch. Now I ask for one function at a time and compare.
+3. **A category bug.** Extra spaces between words (for example `Fast   Food`) were not removed. A test caught it, I worked out the cause, and fixed it.
+
+### What I learned
+
+AI writes correct code quickly when the description is exact, but it also builds the gaps in that description exactly. Writing the tests myself is how I know the code does what I meant.
