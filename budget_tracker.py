@@ -191,6 +191,22 @@ def month_total(records, month):
         if expense_date.startswith(month)
     )
 
+def count_above(record, limit):
+    count = 0
+    for expense in record:
+        if expense[2] > limit:
+            count += 1
+    return count
+
+def range_total(records, start, end):
+    total = 0
+
+    for date, category, amount in records:
+        if start <= date <= end:
+            total += amount
+
+    return total
+
 def monthly_summary():
     months = [
         "January", "February", "March", "April",
