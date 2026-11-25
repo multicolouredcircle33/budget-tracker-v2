@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/multicolouredcircle33/budget-tracker-v2/actions/workflows/tests.yml/badge.svg)](https://github.com/multicolouredcircle33/budget-tracker-v2/actions/workflows/tests.yml)
 
-A personal budget tracker that runs in the terminal. Expenses are saved to a CSV file, so your data is still there the next time you open it.
+A personal budget tracker you can use in the terminal or in your browser. Expenses are saved to a CSV file, so your data is still there the next time you open it. Both versions share the same file and the same rules.
 
 ## What it does
 
@@ -12,11 +12,13 @@ A personal budget tracker that runs in the terminal. Expenses are saved to a CSV
 4. **Monthly Summary:** the total for a month you choose, entered as YYYY-MM.
 5. **Exit**
 
+The web version also shows a bar chart of your categories, the total between any two dates, and how many expenses cost more than an amount you choose.
+
 Money is shown in Naira, for example ₦1,500.00.
 
 ## Requirements
 
-Python 3 (tested with Python 3.14 on Windows). The tracker needs no extra packages. pytest is only needed to run the tests.
+Python 3 (tested with Python 3.14 on Windows). The terminal version needs no extra packages. The web version needs Streamlit (installed below). pytest is only needed to run the tests.
 
 ## How to run it
 
@@ -48,6 +50,15 @@ Total Expense: ₦20,000.00
 You have spent ₦20,000.00 on Food.
 ```
 
+## Run the web version
+
+```
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Your browser opens the page at `http://localhost:8501`. Add an expense, then look at the summary, bar chart, monthly total, date range and "over an amount" sections. In the Month box, type a month such as `2026-10` and press Enter. To stop the app, press Ctrl+C in the terminal.
+
 ## Try it with sample data
 
 `sample_budget_tracker.csv` holds six made-up expenses so you can see the summaries without typing anything in.
@@ -55,8 +66,8 @@ You have spent ₦20,000.00 on Food.
 1. Copy it to the file name the program reads.
    Windows (PowerShell): `Copy-Item sample_budget_tracker.csv budget_tracker.csv`
    Mac or Linux: `cp sample_budget_tracker.csv budget_tracker.csv`
-2. Run `python budget_tracker.py` and choose option 2. The total should be ₦60,000.00, with Rent (₦50,000.00) as the biggest category.
-3. Choose option 4 and enter `2026-10`. You should see ₦56,500.00.
+2. Run `python budget_tracker.py` and choose option 2, or open the web version. The total should be ₦60,000.00, with Rent (₦50,000.00) as the biggest category.
+3. In option 4, or the web page's Month box, enter `2026-10`. You should see ₦56,500.00.
 
 Copying replaces any `budget_tracker.csv` you already have, so do this before you record your own expenses.
 
@@ -75,23 +86,28 @@ The first time you run the tracker, it creates `budget_tracker.csv` in the same 
 
 This file is listed in `.gitignore`, so your spending is never uploaded to GitHub.
 
-If you edit the file by hand, use a text editor, not a spreadsheet program. Spreadsheets can change the date format, and rows with a changed date are skipped. When rows are skipped, the tracker prints a warning with the number of rows.
+If you edit the file by hand, use a text editor, not a spreadsheet program. Spreadsheets can change the date format, and rows with a changed date are skipped. When rows are skipped, the tracker prints a warning with the number of rows (the web version shows it at the top of the page).
 
 ## Project files
 
 | File | What it is |
 |---|---|
-| `budget_tracker.py` | The tracker |
+| `budget_tracker.py` | The tracker, and the shared rules both versions use |
+| `app.py` | The web version (Streamlit) |
 | `test_budget_tracker.py` | pytest tests |
+| `SPEC.md` | The spec the web version was built from |
 | `sample_budget_tracker.csv` | Made-up expenses for trying the tracker |
+| `requirements.txt` | What to install to run the web version |
+| `requirements
+.txt` | What to install to run the web version |
 | `requirements-dev.txt` | What to install to run the tests |
 | `.gitignore` | Keeps personal data and practice files off GitHub |
 
 ## Not included (yet)
 
 1. Editing or deleting an expense
-2. Summaries over a date range
-3. Tests for the amount check
+2. Logins or more than one user
+3. Putting the web version online
 
 ## How AI was used
 
@@ -105,12 +121,15 @@ I built this project while studying how useful AI is in software engineering, so
 | `category_totals` and `month_total` | ChatGPT, from a short description. It never saw my tests | My tests, written first. 8 of 8 passed on the first try |
 | Tests | Me | I watched each test fail before the code existed, then pass after |
 | README, sample data and the GitHub test workflow | Drafted by Claude from the actual code | I ran the commands and checked the results |
+| Web edition: `parse_amount`, `parse_month`, `read_expenses` and `app.py` | ChatGPT, each in a new chat, from the parts of `SPEC.md` | 20 new tests written first: 20 of 20 passed on the first try. I checked the web page by hand against a 7-part list from the spec |
 
 ### What went wrong
 
 1. **A gap in the spec.** It never said what to do when the CSV file does not end with a new line. ChatGPT followed the spec exactly, so a new expense got glued onto the last row. I found it by testing with a file saved from a spreadsheet, and fixed it.
 2. **An unrequested change.** When I asked ChatGPT to reprint the whole file, it quietly rewrote a function I had not asked it to touch. Now I ask for one function at a time and compare.
 3. **A category bug.** Extra spaces between words (for example `Fast   Food`) were not removed. A test caught it, I worked out the cause, and fixed it.
+4. **Another spec gap, caught before coding.** Saving the very first expense from the web page would have created the CSV without a header row, and that expense would then have disappeared. It was found while reviewing the spec, so a rule was added before ChatGPT wrote any code.
+5. **Unrequested additions in the web page.** ChatGPT added five things the spec did not ask for, such as a tab icon and an error when the start date is after the end date. I only knew because I compared its code with the spec. All five were harmless, so I kept them.
 
 ### What I learned
 
