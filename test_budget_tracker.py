@@ -143,3 +143,81 @@ def test_range_total_does_not_change_records():
     before = list(COUNT_RECORDS)
     budget_tracker.range_total(COUNT_RECORDS, "2026-10-01", "2026-10-31")
     assert COUNT_RECORDS == before
+
+
+def test_parse_amount_removes_commas():
+    assert budget_tracker.parse_amount("50,000") == 50000.0
+
+
+def test_parse_amount_strips_outer_spaces():
+    assert budget_tracker.parse_amount(" 12.50 ") == 12.5
+
+
+def test_parse_amount_removes_inner_spaces():
+    assert budget_tracker.parse_amount("1 500") == 1500.0
+
+
+@pytest.mark.parametrize("text", ["0", "-5", "abc", "inf", "nan", ""])
+def test_parse_amount_rejects_bad_input(text):
+    with pytest.raises(ValueError):
+        budget_tracker.parse_amount(text)
+
+
+def test_parse_month_accepts_valid_month():
+    assert budget_tracker.parse_month("2026-03") == "2026-03"
+
+
+@pytest.mark.parametrize("text", ["2026-3", "March", ""])
+def test_parse_month_rejects_wrong_format(text):
+    with pytest.raises(ValueError, match="format YYYY-MM"):
+        budget_tracker.parse_month(text)
+
+
+@pytest.mark.parametrize("text", ["2026-13", "2026-00"])
+def test_parse_month_rejects_month_out_of_range(text):
+    with pytest.raises(ValueError, match="1 to 12"):
+        budget_tracker.parse_month(text)
+
+
+CSV_HEADER_AND_TWO_ROWS = (
+    "date,category,amount\n"
+    "2026-10-05,food,1500.0\n"
+    "2026-10-10,Rent,50000\n"
+)
+
+TWO_RECORDS = [
+    ("2026-10-05", "Food", 1500.0),
+    ("2026-10-10", "Rent", 50000.0),
+]
+
+
+def test_read_expenses_reads_valid_rows(tmp_path):
+    data = tmp_path / "data.csv"
+    data.write_text(CSV_HEADER_AND_TWO_ROWS)
+    assert budget_tracker.read_expenses(data) == (TWO_RECORDS, 0)
+
+
+def test_read_expenses_counts_invalid_row(tmp_path):
+    data = tmp_path / "data.csv"
+    data.write_text(CSV_HEADER_AND_TWO_ROWS + "05/10/2026,Food,100\n")
+    assert budget_tracker.read_expenses(data) == (TWO_RECORDS, 1)
+
+
+def test_read_expenses_ignores_blank_rows(tmp_path):
+    data = tmp_path / "data.csv"
+    data.write_text(CSV_HEADER_AND_TWO_ROWS + "\n")
+    assert budget_tracker.read_expenses(data) == (TWO_RECORDS, 0)
+
+
+def test_read_expenses_missing_file_gives_empty_and_creates_nothing(tmp_path):
+    missing = tmp_path / "missing.csv"
+    assert budget_tracker.read_expenses(missing) == ([], 0)
+    assert not missing.exists()
+
+
+def test_read_expenses_does_not_touch_global_list(tmp_path):
+    data = tmp_path / "data.csv"
+    data.write_text(CSV_HEADER_AND_TWO_ROWS)
+    before = list(budget_tracker.expenses)
+    budget_tracker.read_expenses(data)
+    assert budget_tracker.expenses == before

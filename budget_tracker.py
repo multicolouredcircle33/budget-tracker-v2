@@ -27,41 +27,8 @@ def load_expenses():
             writer.writerow(["date", "category", "amount"])
         return
 
-    skipped_rows = 0
-
-    with open(filename, "r", newline="") as file:
-        reader = csv.reader(file)
-        next(reader, None)
-
-        for row in reader:
-            if not row or all(not field.strip() for field in row):
-                continue
-
-            try:
-                if len(row) != 3:
-                    raise ValueError
-
-                expense_date, category, amount_text = row
-
-                parsed_date = datetime.strptime(
-                    expense_date, "%Y-%m-%d"
-                ).date()
-
-                if parsed_date.isoformat() != expense_date:
-                    raise ValueError
-
-                category = clean_category(category)
-
-                cleaned = amount_text.replace(",", "").replace(" ", "")
-                amount = float(cleaned)
-
-                if amount <= 0 or not math.isfinite(amount):
-                    raise ValueError
-
-                expenses.append((expense_date, category, amount))
-
-            except ValueError:
-                skipped_rows += 1
+    records, skipped_rows = read_expenses(filename)
+    expenses.extend(records)
 
     if skipped_rows:
         row_word = "row" if skipped_rows == 1 else "rows"
@@ -96,6 +63,80 @@ def clean_category(text):
 
     return category
 
+def parse_amount(text):
+    try:
+        amount = float(text.replace(",", "").replace(" ", ""))
+    except (ValueError, AttributeError):
+        raise ValueError("Invalid amount.")
+
+    if not math.isfinite(amount) or amount <= 0:
+        raise ValueError("Invalid amount.")
+
+    return amount
+
+
+def parse_month(text):
+    if (
+        len(text) != 7
+        or not text[:4].isdigit()
+        or text[4] != "-"
+        or not text[5:].isdigit()
+    ):
+        raise ValueError(
+            "Invalid month. Use the format YYYY-MM, for example 2026-03."
+        )
+
+    month = int(text[5:])
+
+    if month < 1 or month > 12:
+        raise ValueError("Invalid month. Use a month from 1 to 12.")
+
+    return text
+
+
+def read_expenses(filename):
+    records = []
+    skipped = 0
+
+    if not os.path.exists(filename):
+        return records, skipped
+
+    with open(filename, "r", newline="") as file:
+        reader = csv.reader(file)
+
+        next(reader, None)
+
+        for row in reader:
+            if not row or all(not field.strip() for field in row):
+                continue
+
+            if len(row) != 3:
+                skipped += 1
+                continue
+
+            expense_date, category, amount = row
+
+            try:
+                parsed_date = datetime.strptime(
+                    expense_date, "%Y-%m-%d"
+                ).date()
+
+                if parsed_date.isoformat() != expense_date:
+                    raise ValueError("Invalid date.")
+
+                cleaned_category = clean_category(category)
+                parsed_amount = parse_amount(amount)
+
+            except ValueError:
+                skipped += 1
+                continue
+
+            records.append(
+                (expense_date, cleaned_category, parsed_amount)
+            )
+
+    return records, skipped
+
 def record_expense():
     while True:
         try:
@@ -110,18 +151,7 @@ def record_expense():
 
     while True:
         try:
-            cleaned = input(
-                'Enter the expense amount: '
-            ).replace(",", "").replace(" ", "")
-
-            expense_amount = float(cleaned)
-
-            if expense_amount <= 0:
-                raise ValueError
-
-            if not math.isfinite(expense_amount):
-                raise ValueError
-
+            expense_amount = parse_amount(input('Enter the expense amount: '))
             break
 
         except ValueError:
@@ -215,28 +245,14 @@ def monthly_summary():
     ]
 
     while True:
-        month_input = input('Enter month (YYYY-MM): ')
+        try:
+            month_input = parse_month(input('Enter month (YYYY-MM): '))
+            break
 
-        if not (
-            len(month_input) == 7
-            and month_input[:4].isdigit()
-            and month_input[4] == "-"
-            and month_input[5:].isdigit()
-        ):
-            print(
-                'Invalid month. Use the format YYYY-MM, '
-                'for example 2026-03.'
-            )
-            continue
+        except ValueError as error:
+            print(error)
 
-        month_number = int(month_input[5:])
-
-        if month_number < 1 or month_number > 12:
-            print('Invalid month. Use a month from 1 to 12.')
-            continue
-
-        break
-
+    month_number = int(month_input[5:])
     year = month_input[:4]
 
     total = month_total(expenses, month_input)
