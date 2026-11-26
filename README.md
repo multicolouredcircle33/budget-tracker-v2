@@ -16,19 +16,24 @@ The web version also shows a bar chart of your categories, the total between any
 
 Money is shown in Naira, for example ₦1,500.00.
 
-## Requirements
+## What you need
 
-Python 3 (tested with Python 3.14 on Windows). The terminal version needs no extra packages. The web version needs Streamlit (installed below). pytest is only needed to run the tests.
+1. **Python 3** (tested with Python 3.14 on Windows). If you don't have it, install the free **Python install manager** from the Microsoft Store (or from python.org). Then open a terminal and type `python`. The first time, it downloads Python for you. If it asks to add a folder to your PATH, say yes.
+2. **The code.** Click the green **Code** button at the top of this page, then **Download ZIP**, and unzip it. If you use Git, you can run `git clone https://github.com/multicolouredcircle33/budget-tracker-v2.git` instead.
 
-## How to run it
+The terminal version needs nothing else. The web version needs Streamlit, which you install with one command below.
+
+## Open a terminal in the project folder
+
+On Windows, open the unzipped folder in File Explorer. Use the folder that contains `README.md` and `app.py`; after unzipping, it may be inside a second folder with the same name. Click the address bar, type `powershell` and press Enter. A terminal opens in that folder.
+
+## How to run it (terminal version)
 
 ```
-git clone https://github.com/multicolouredcircle33/budget-tracker-v2.git
-cd budget-tracker-v2
 python budget_tracker.py
 ```
 
-On Windows, if `python` is not recognised, use `py budget_tracker.py`.
+If `python` is not recognised, use `py budget_tracker.py`.
 
 Example session (adding a ₦20,000 food expense, then viewing the summary):
 
@@ -53,11 +58,11 @@ You have spent ₦20,000.00 on Food.
 ## Run the web version
 
 ```
-pip install -r requirements.txt
-streamlit run app.py
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
 ```
 
-Your browser opens the page at `http://localhost:8501`. Add an expense, then look at the summary, bar chart, monthly total, date range and "over an amount" sections. In the Month box, type a month such as `2026-10` and press Enter. To stop the app, press Ctrl+C in the terminal.
+The first command downloads Streamlit, which takes about a minute on a new computer. The second opens the page in your browser at `http://localhost:8501`. Add an expense, then look at the summary, bar chart, monthly total, date range and "over an amount" sections. In the Month box, type a month such as `2026-10` and press Enter. To stop the app, press Ctrl+C in the terminal.
 
 ## Try it with sample data
 
@@ -74,63 +79,12 @@ Copying replaces any `budget_tracker.csv` you already have, so do this before yo
 ## How to run the tests
 
 ```
-pip install -r requirements-dev.txt
-pytest
+python -m pip install -r requirements-dev.txt
+python -m pytest
 ```
 
 Every test should pass.
 
 ## Your data
 
-The first time you run the tracker, it creates `budget_tracker.csv` in the same folder. Each expense is one line in the form `date,category,amount`.
-
-This file is listed in `.gitignore`, so your spending is never uploaded to GitHub.
-
-If you edit the file by hand, use a text editor, not a spreadsheet program. Spreadsheets can change the date format, and rows with a changed date are skipped. When rows are skipped, the tracker prints a warning with the number of rows (the web version shows it at the top of the page).
-
-## Project files
-
-| File | What it is |
-|---|---|
-| `budget_tracker.py` | The tracker, and the shared rules both versions use |
-| `app.py` | The web version (Streamlit) |
-| `test_budget_tracker.py` | pytest tests |
-| `SPEC.md` | The spec the web version was built from |
-| `sample_budget_tracker.csv` | Made-up expenses for trying the tracker |
-| `requirements.txt` | What to install to run the web version |
-| `requirements
-.txt` | What to install to run the web version |
-| `requirements-dev.txt` | What to install to run the tests |
-| `.gitignore` | Keeps personal data and practice files off GitHub |
-
-## Not included (yet)
-
-1. Editing or deleting an expense
-2. Logins or more than one user
-3. Putting the web version online
-
-## How AI was used
-
-I built this project while studying how useful AI is in software engineering, so this section records exactly what AI did, what I did, and how each part was checked.
-
-| Part | Who did it | How it was checked |
-|---|---|---|
-| Version 1 of the tracker | Me | An AI code review. I checked each point it raised, and 3 of 3 were correct |
-| Specification for v2 | Me, in three drafts. Claude then asked me 53 questions to find gaps and wrote the final spec from my answers | I read the final spec against my answers |
-| v2 code | ChatGPT, built in three steps from my spec | I ran worked examples after each step |
-| `category_totals` and `month_total` | ChatGPT, from a short description. It never saw my tests | My tests, written first. 8 of 8 passed on the first try |
-| Tests | Me | I watched each test fail before the code existed, then pass after |
-| README, sample data and the GitHub test workflow | Drafted by Claude from the actual code | I ran the commands and checked the results |
-| Web edition: `parse_amount`, `parse_month`, `read_expenses` and `app.py` | ChatGPT, each in a new chat, from the parts of `SPEC.md` | 20 new tests written first: 20 of 20 passed on the first try. I checked the web page by hand against a 7-part list from the spec |
-
-### What went wrong
-
-1. **A gap in the spec.** It never said what to do when the CSV file does not end with a new line. ChatGPT followed the spec exactly, so a new expense got glued onto the last row. I found it by testing with a file saved from a spreadsheet, and fixed it.
-2. **An unrequested change.** When I asked ChatGPT to reprint the whole file, it quietly rewrote a function I had not asked it to touch. Now I ask for one function at a time and compare.
-3. **A category bug.** Extra spaces between words (for example `Fast   Food`) were not removed. A test caught it, I worked out the cause, and fixed it.
-4. **Another spec gap, caught before coding.** Saving the very first expense from the web page would have created the CSV without a header row, and that expense would then have disappeared. It was found while reviewing the spec, so a rule was added before ChatGPT wrote any code.
-5. **Unrequested additions in the web page.** ChatGPT added five things the spec did not ask for, such as a tab icon and an error when the start date is after the end date. I only knew because I compared its code with the spec. All five were harmless, so I kept them.
-
-### What I learned
-
-AI writes correct code quickly when the description is exact, but it also builds the gaps in that description exactly. Writing the tests myself is how I know the code does what I meant.
+The first time you run the tracker, it creates `budget_tracker.csv` in the same folder. Each expense is one line in the
