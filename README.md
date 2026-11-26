@@ -2,6 +2,8 @@
 
 [![tests](https://github.com/multicolouredcircle33/budget-tracker-v2/actions/workflows/tests.yml/badge.svg)](https://github.com/multicolouredcircle33/budget-tracker-v2/actions/workflows/tests.yml)
 
+**Demo:** [watch the 3-minute video](https://drive.google.com/file/d/1uTkv5LtoNosHpu_bAF75HCoCqGif-hE2/view?usp=sharing)
+
 A personal budget tracker you can use in the terminal or in your browser. Expenses are saved to a CSV file, so your data is still there the next time you open it. Both versions share the same file and the same rules.
 
 ## What it does
